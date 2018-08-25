@@ -1,4 +1,19 @@
 from enum import Enum
+import json
+
+
+class _LangCodes:
+    """LangCodes Class"""
+
+    def load(self, filename):
+        """ loads lang codes from json file """
+        data = json.loads(open(filename, 'r').read())
+        for key, info in data.items():
+            setattr(self, info['name'], key)
+        return self
+
+# load language codes from json file
+LangCodes = _LangCodes().load('lang_codes.json')
 
 
 class Relation(Enum):
@@ -13,6 +28,7 @@ class Relation(Enum):
 class Filter:
 
     def __init__(self):
+        """ initiate a new Filter """
         self._values = []
 
     @staticmethod
@@ -141,3 +157,7 @@ class Filter:
         """ appends Or between the previous and next entries """
         self._values.append({'operator': 'OR'})
         return self
+
+    def to_json(self):
+        """ :return: json formatter filter """
+        return json.dumps(self._values)
