@@ -27,6 +27,51 @@ class Relation(Enum):
     NotExists = 'not_exists'
 
 
+class Buttons:
+
+    def __init__(self):
+        self._buttons = []
+        self._web_buttons = []
+
+    def add_button(self, id: str, text: str, icon: str=None):
+        """
+        Add a new action button
+        :param id: button's id
+        :param text: button's text
+        :param icon: optional button icon (Only works for android)
+        """
+        self._buttons.append({'id': id, 'text': text, 'icon': icon})
+        return self
+
+    def add_web_buttons(self, id: str, text: str, icon: str, url: str):
+        """
+        Add a new web action button
+        :param id: button's id
+        :param text: button's text
+        :param icon: button's icon
+        :param url: redirection url
+        """
+        self._web_buttons.append({'id': id, 'text': text,
+                                  'icon': icon, 'url': url})
+        return self
+
+    @property
+    def buttons_json(self):
+        return json.dumps(self._buttons)
+
+    @property
+    def buttons(self):
+        return self._buttons
+
+    @property
+    def web_buttons_json(self):
+        return json.dumps(self._web_buttons)
+
+    @property
+    def web_buttons(self):
+        return self._web_buttons
+
+
 class Filter:
 
     def __init__(self):
@@ -423,6 +468,54 @@ class Notification:
         self._data['chrome_big_picture'] = picture
         return self
 
+    def add_buttons(self, buttons: Buttons):
+        """
+        add buttons from the Button generator
+        :param buttons: Buttons instance
+        """
+
+        if 'buttons' not in self._data:
+            self._data['buttons'] = []
+        if 'web_buttons' not in self._data:
+            self._data['web_buttons'] = []
+
+        self._data['buttons'] += buttons.buttons
+        self._data['web_buttons'] += buttons.web_buttons
+
+    def add_buttons_raw(self, json_data: dict):
+        """
+        add raw button data in json format
+        :param json_data: button data
+        """
+
+        if 'buttons' not in self._data:
+            self._data['buttons'] = []
+
+        self._data['buttons'].append(json_data)
+        return self
+
+    def add_web_buttons_raw(self, json_data: dict):
+        """
+        add raw web button data in json format
+        :param json_data: web button data
+        """
+
+        if 'web_buttons' not in self._data:
+            self._data['web_buttons'] = []
+
+        self._data['web_buttons'].append(json_data)
+        return self
+
+    def set_ios_category(self, category: str):
+        """
+        Category APS payload, use with registerUserNotificationSettings:categories
+        in your Objective-C / Swift code. Example: in your Objective-C / Swift code.
+        :param category: category payload
+        """
+
+        self._data['ios_category'] = category
+        return self
+
 
 class NotificationCenter:
 
@@ -437,6 +530,14 @@ class NotificationCenter:
         """
         self._app_id = app_id
         self._api_key = api_key
+
+    @staticmethod
+    def _get(url: str, headers: dict):
+        pass
+
+    @staticmethod
+    def _post(url: str, headers: dict, paylaod: dict):
+        pass
 
     def post(self, notification: Notification):
         """
