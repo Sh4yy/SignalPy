@@ -1,5 +1,6 @@
-from enum import Enum
 from datetime import datetime, timedelta
+import requests
+from enum import Enum
 import json
 import re
 
@@ -597,6 +598,10 @@ class Notification:
         self._data = {**self._data, **delivery.data}
         return self
 
+    def to_json(self):
+        """ :return: json string representation of this notification"""
+        return json.dumps(self._data)
+
 
 class OneSignal:
 
@@ -613,12 +618,53 @@ class OneSignal:
         self._api_key = api_key
 
     @staticmethod
+    def _create_header(api_key):
+        """
+        create custom header for the api
+        :param api_key: oensignal's api key
+        :return: header in dict format
+        """
+        return {
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": "Basic {}".format(api_key)
+        }
+
+    @staticmethod
     def _get(url: str, headers: dict):
-        pass
+        """
+        make a get request
+        :param url: endpoint url
+        :param headers: request headers
+        :return: json data
+        """
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        return response.json()
 
     @staticmethod
     def _post(url: str, headers: dict, paylaod: dict):
-        pass
+        """
+        make a post request
+        :param url: endpoint url
+        :param headers: request headers
+        :param paylaod: request payload
+        :return: json data
+        """
+        response = requests.post(url, json=paylaod, headers=headers)
+        response.raise_for_status()
+        return response.json()
+
+    @staticmethod
+    def _delete(url: str, headers: dict):
+        """
+        make a delete request
+        :param url: endpoint url
+        :param headers: request headers
+        :return: json data
+        """
+        response = requests.delete(url, headers=headers)
+        response.raise_for_status()
+        return response.json()
 
     def post(self, notification: Notification):
         """
@@ -626,7 +672,10 @@ class OneSignal:
         :param notification: notification instance
         :return: (not decided yet)
         """
-        pass
+        payload = notification.to_json()
+        payload['app_id'] = self._app_id
+        headers = OneSignal._create_header(self._api_key)
+        return OneSignal._post(self._url, headers, payload)
 
     def cancel(self, notification_id: str):
         """
@@ -634,4 +683,6 @@ class OneSignal:
         :param notification_id: notification's id
         :return: (not decided yet)
         """
-        pass
+        headers = OneSignal._create_header(self._api_key)
+        url = self._url + "{}?app_id=[}".format(notification_id, self._app_id)
+        return OneSignal._delete(url, headers)
