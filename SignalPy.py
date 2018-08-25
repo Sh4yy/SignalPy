@@ -1,5 +1,6 @@
 from enum import Enum
 import json
+import re
 
 
 class _LangCodes:
@@ -23,6 +24,10 @@ class Relation(Enum):
     NotEqual = '!='
     Exists = 'exists'
     NotExists = 'not_exists'
+
+
+class Notification:
+    pass
 
 
 class Filter:
@@ -160,4 +165,99 @@ class Filter:
 
     def to_json(self):
         """ :return: json formatter filter """
+        return json.dumps(self._values)
+
+
+class TargetDevice:
+
+    def __init__(self):
+        self._values = {}
+
+    def include_player_ids(self, tokens: [str]):
+        """
+        Set specific players to send your notification to
+        :param tokens: specific player ids
+        """
+
+        if len(tokens) > 2000:
+            raise Exception('Exceeded the limit of 2000 per api call')
+        self._values['include_player_ids'] = tokens
+        return self
+
+    def include_ios_tokens(self, tokens: [str]):
+        """
+        Please consider using include_player_ids instead
+        Target using iOS device tokens. Warning: Only works with Production tokens.
+        :param tokens: iOS device tokens
+        """
+
+        if len(tokens) > 2000:
+            raise Exception('Exceeded the limit of 2000 per api call')
+        # removing all non alphanumerical characters
+        tokens = map(lambda x: re.sub(r'\W+', '', x), tokens)
+        self._values['include_ios_tokens'] = tokens
+        return self
+
+    def include_wp_wns_uris(self, tokens: [str]):
+        """
+        Please consider using include_player_ids instead
+        Target using Windows URIs.
+        If a token does not correspond to an existing user, a new user will be created
+        :param tokens: Windows URIs
+        """
+        if len(tokens) > 2000:
+            raise Exception('Exceeded the limit of 2000 per api call')
+        self._values['include_wp_wns_uris'] = tokens
+        return self
+
+    def include_amazon_reg_ids(self, tokens: [str]):
+        """
+        Please consider using include_player_ids instead
+        Target using Amazon ADM registration IDs.
+        If a token does not correspond to an existing user, a new user will be created.
+        :param tokens: Amazon ADM registration IDs
+        """
+        if len(tokens) > 2000:
+            raise Exception('Exceeded the limit of 2000 per api call')
+        self._values['include_amazon_reg_ids'] = tokens
+        return self
+
+    def include_chrome_reg_ids(self, tokens: [str]):
+        """
+        Please consider using include_player_ids instead
+        Target using Chrome App registration IDs.
+        If a token does not correspond to an existing user, a new user will be created
+        :param tokens:
+        """
+        if len(tokens) > 2000:
+            raise Exception('Exceeded the limit of 2000 per api call')
+        self._values['include_chrome_reg_ids'] = tokens
+        return self
+
+    def include_chrome_web_reg_ids(self, tokens: [str]):
+        """
+        Please consider using include_player_ids instead
+        Target using Chrome Web Push registration IDs.
+        If a token does not correspond to an existing user, a new user will be created.
+        :param tokens: Chrome Web Push registration IDs
+        """
+        if len(tokens) > 2000:
+            raise Exception('Exceeded the limit of 2000 per api call')
+        self._values['include_chrome_web_reg_ids'] = tokens
+        return self
+
+    def include_android_reg_ids(self, tokens: [str]):
+        """
+        Please consider using include_player_ids instead
+        Target using Android device registration IDs.
+        If a token does not correspond to an existing user, a new user will be created.
+        :param tokens: Android device registration IDs
+        """
+        if len(tokens) > 2000:
+            raise Exception('Exceeded the limit of 2000 per api call')
+        self._values['include_android_reg_ids'] = tokens
+        return self
+
+    def to_json(self):
+        """ :return: json formatted TargetDevice """
         return json.dumps(self._values)
