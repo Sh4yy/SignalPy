@@ -13,6 +13,7 @@ class _LangCodes:
             setattr(self, info['name'], key)
         return self
 
+
 # load language codes from json file
 LangCodes = _LangCodes().load('lang_codes.json')
 
@@ -24,116 +25,6 @@ class Relation(Enum):
     NotEqual = '!='
     Exists = 'exists'
     NotExists = 'not_exists'
-
-
-class Notification:
-
-    def __init__(self):
-        self._data = {}
-
-    def add_filters(self, filters: Filter):
-        """
-        add user targeting filters
-        :param filters: filter instance
-        """
-        self._data['filters'] = filters.to_json()
-        return self
-
-    def add_segments(self, segments: [str]):
-        """
-        add target segments
-        :param segments: list of segments
-        """
-        self._data['included_segments'] = segments
-        return self
-
-    def add_content(self, lang_code: str, message: str):
-        """
-        The notification's content (excluding the title),
-        a map of language codes to text for each language.
-        :param lang_code: language code string
-        :param message: localized text
-        """
-        if not hasattr(self._data, 'contents'):
-            self._data['contents'] = {}
-
-        self._data['contents'][lang_code] = message
-        return self
-
-    def add_contents(self, json_content: dict):
-        """
-        The notification's content (excluding the title),
-        a map of language codes to text for each language.
-        :param json_content: add bulk json content
-        Example: {"en": "English Message", "es": "Spanish Message"}
-        """
-        if not hasattr(self._data, 'contents'):
-            self._data['contents'] = {}
-
-        data = self._data['contents'].items() + json_content.items()
-        self._data['contents'] = dict(data)
-        return self
-
-    def add_heading(self, lang_code: str, heading: str):
-        """
-        The notification's title, a map of language codes to text for each language
-        :param lang_code: language code string
-        :param heading: localized text
-        """
-        if not hasattr(self._data, 'headings'):
-            self._data['headings'] = {}
-
-        self._data['headings'][lang_code] = heading
-        return self
-
-    def add_headings(self, json_heading: dict):
-        """
-        The notification's title, a map of language codes to text for each language
-        :param json_heading: add bulk json heading
-        Example: {"en": "English Title", "es": "Spanish Title"}
-        """
-        if not hasattr(self._data, 'headings'):
-            self._data['headings'] = {}
-
-        data = self._data['headings'].items() + json_heading.items()
-        self._data['headings'] = dict(data)
-        return self
-
-    def add_subtitle(self, lang_code: str, subtitle: str):
-        """
-        The notification's subtitle, a map of language codes to text for each language.
-        :param lang_code: language code string
-        :param subtitle: localized text
-        """
-        if not hasattr(self._data, 'subtitle'):
-            self._data['subtitle'] = {}
-
-        self._data['subtitle'][lang_code] = subtitle
-        return self
-
-    def add_subtitles(self, json_subtitles: dict):
-        """
-        The notification's subtitle, a map of language codes to text for each language.
-        :param json_subtitles: add bulk json heading
-        Example: {"en": "English Subtitle", "es": "Spanish Subtitle"}
-        """
-        if not hasattr(self._data, 'subtitle'):
-            self._data['subtitle'] = {}
-
-        data = self._data['subtitle'].items() + json_subtitles.items()
-        self._data['subtitle'] = dict(data)
-        return self
-
-    def set_content_available(self, value: bool):
-        """ Sending true wakes your app from background to run custom native code """
-        self._data['content_available'] = value
-        return self
-
-    def set_mutable_content(self, value: bool):
-        """ Sending true allows you to change the notification
-        content in your app before it is displayed. """
-        self._data['mutable_content'] = value
-        return self
 
 
 class Filter:
@@ -371,3 +262,194 @@ class TargetDevice:
     def to_json(self):
         """ :return: json formatted TargetDevice """
         return json.dumps(self._values)
+
+
+class Notification:
+
+    def __init__(self):
+        self._data = {}
+
+    def add_filters(self, filters: Filter):
+        """
+        add user targeting filters
+        :param filters: filter instance
+        """
+        self._data['filters'] = filters.to_json()
+        return self
+
+    def add_segments(self, segments: [str]):
+        """
+        add target segments
+        :param segments: list of segments
+        """
+        self._data['included_segments'] = segments
+        return self
+
+    def add_content(self, lang_code: str, message: str):
+        """
+        The notification's content (excluding the title),
+        a map of language codes to text for each language.
+        :param lang_code: language code string
+        :param message: localized text
+        """
+        if not hasattr(self._data, 'contents'):
+            self._data['contents'] = {}
+
+        self._data['contents'][lang_code] = message
+        return self
+
+    def add_contents(self, json_content: dict):
+        """
+        The notification's content (excluding the title),
+        a map of language codes to text for each language.
+        :param json_content: add bulk json content
+        Example: {"en": "English Message", "es": "Spanish Message"}
+        """
+        if not hasattr(self._data, 'contents'):
+            self._data['contents'] = {}
+
+        data = self._data['contents'].items() + json_content.items()
+        self._data['contents'] = dict(data)
+        return self
+
+    def add_heading(self, lang_code: str, heading: str):
+        """
+        The notification's title, a map of language codes to text for each language
+        :param lang_code: language code string
+        :param heading: localized text
+        """
+        if not hasattr(self._data, 'headings'):
+            self._data['headings'] = {}
+
+        self._data['headings'][lang_code] = heading
+        return self
+
+    def add_headings(self, json_heading: dict):
+        """
+        The notification's title, a map of language codes to text for each language
+        :param json_heading: add bulk json heading
+        Example: {"en": "English Title", "es": "Spanish Title"}
+        """
+        if not hasattr(self._data, 'headings'):
+            self._data['headings'] = {}
+
+        data = self._data['headings'].items() + json_heading.items()
+        self._data['headings'] = dict(data)
+        return self
+
+    def add_subtitle(self, lang_code: str, subtitle: str):
+        """
+        The notification's subtitle, a map of language codes to text for each language.
+        :param lang_code: language code string
+        :param subtitle: localized text
+        """
+        if not hasattr(self._data, 'subtitle'):
+            self._data['subtitle'] = {}
+
+        self._data['subtitle'][lang_code] = subtitle
+        return self
+
+    def add_subtitles(self, json_subtitles: dict):
+        """
+        The notification's subtitle, a map of language codes to text for each language.
+        :param json_subtitles: add bulk json heading
+        Example: {"en": "English Subtitle", "es": "Spanish Subtitle"}
+        """
+        if not hasattr(self._data, 'subtitle'):
+            self._data['subtitle'] = {}
+
+        data = self._data['subtitle'].items() + json_subtitles.items()
+        self._data['subtitle'] = dict(data)
+        return self
+
+    def set_content_available(self, value: bool):
+        """ Sending true wakes your app from background to run custom native code """
+        self._data['content_available'] = value
+        return self
+
+    def set_mutable_content(self, value: bool):
+        """ Sending true allows you to change the notification
+        content in your app before it is displayed. """
+        self._data['mutable_content'] = value
+        return self
+
+    def add_data(self, data: dict):
+        """
+        :param data: A custom map of data that is passed back to your app
+        Example: {"abc": "123", "foo": "bar"}
+        """
+        self._data['data'] = data
+        return self
+
+    def add_url(self, url: str):
+        """
+        :param url: The URL to open in the browser when a user clicks on the notification.
+        """
+        self._data['url'] = url
+        return self
+
+    def set_ios_attachments(self, attachments: dict):
+        """
+        Adds media attachments to notifications. Set as JSON object,
+        key as a media id of your choice and the value as a valid
+        local filename or URL. User must press and hold on the notification to view.
+        :param attachments: attachments for your ios client
+        Example: {"id1": "https://domain.com/image.jpg"}
+        """
+        self._data['ios_attachemtns'] = attachments
+        return self
+
+    def set_bit_picture(self, picture: str):
+        """
+        Picture to display in the expanded view.
+        :param picture: Picture to display in the expanded view.
+        """
+        self._data['bit_picture'] = picture
+        return self
+
+    def set_adm_big_picture(self, picture: str):
+        """
+        Picture to display in the expanded view.
+        :param picture: Picture to display in the expanded view.
+        """
+        self._data['adm_big_picture'] = picture
+        return self
+
+    def set_chrome_big_picture(self, picture: str):
+        """
+        Large picture to display below the notification text.
+        :param picture: Must be a local URL.
+        """
+        self._data['chrome_big_picture'] = picture
+        return self
+
+
+class NotificationCenter:
+
+    _url = 'https://onesignal.com/api/v1/notifications'
+
+    def __init__(self, app_id: str, api_key: str):
+        """
+        Initiate a new notification center
+        For app_id and api_key refer to: https://goo.gl/NzpytH
+        :param app_id: onesignal's app id
+        :param api_key: onesignal's rest api key
+        """
+        self._app_id = app_id
+        self._api_key = api_key
+
+    def post(self, notification: Notification):
+        """
+        submit a notification to the api
+        :param notification: notification instance
+        :return: (not decided yet)
+        """
+        pass
+
+    def cancel(self, notification_id: str):
+        """
+        cancel a notification using its notification id
+        :param notification_id: notification's id
+        :return: (not decided yet)
+        """
+        pass
