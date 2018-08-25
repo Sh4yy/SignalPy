@@ -1,4 +1,5 @@
 from enum import Enum
+from datetime import datetime, timedelta
 import json
 import re
 
@@ -25,6 +26,77 @@ class Relation(Enum):
     NotEqual = '!='
     Exists = 'exists'
     NotExists = 'not_exists'
+
+
+class DelayedOption(Enum):
+    Timezone = 'timezone'
+    LastActive = 'last-active'
+
+
+class Delivery:
+
+    def __init__(self):
+        self._data = {}
+
+    def send_after(self, date: datetime):
+        """
+        Schedule notification for future delivery.
+        :param date: future date
+        """
+        if date < datetime.now():
+            raise Exception('date cannot be in the past')
+
+        self._data['send_after'] = date.strftime('%Y-%m-%d %H:%M:%S GMT-0000')
+        return self
+
+    def delayed_option(self, option: DelayedOption):
+        """
+        Options:
+        timezone (Deliver at a specific time-of-day in each users own timezone)
+        last-active Same as Intelligent Delivery . (Deliver at the same time of day as each user last used your app).
+        If send_after is used, this takes effect after the send_after time has elapsed.
+        :param option: delay option
+        """
+        self._data['delayed_option'] = option.value
+        return self
+
+    def delivery_time_of_day(self, time: str):
+        """
+        used with DelayedOption.timezone
+        :param time: time of day "9:00AM"
+        """
+        self._data['delivery_time_of_day'] = time
+        return self
+
+    def time_to_live(self, seconds: int, delta: timedelta=None):
+        """
+        Time To Live - In seconds. The notification will be expired if the device
+        does not come back online within this time. The default is 259,200 seconds (3 days).
+        Max value to set is 2419200 seconds (28 days).
+        :param seconds: number of seconds
+        :param delta: optional time delta
+        """
+
+        total_seconds = seconds if seconds is not None else 0
+        total_seconds += delta.seconds if delta is not None else 0
+        self._data['ttl'] = total_seconds
+        return self
+
+    def priority(self, priority: int):
+        """
+        Delivery priority through the push server (example GCM/FCM). Pass 10 for high priority.
+        Defaults to normal priority for Android and high for iOS. For Android 6.0+ devices
+        setting priority to high will wake the device out of doze mode.
+        :param priority: notification priority
+        """
+
+        self._data['priority'] = priority
+        return self
+
+    @property
+    def data(self):
+        """ :return: delivery data as json """
+        return self._data
 
 
 class Buttons:
@@ -516,8 +588,17 @@ class Notification:
         self._data['ios_category'] = category
         return self
 
+    def set_delivery(self, delivery: Delivery):
+        """
+        set notification delivery option
+        :param delivery: delivery instance
+        """
 
-class NotificationCenter:
+        self._data = {**self._data, **delivery.data}
+        return self
+
+
+class OneSignal:
 
     _url = 'https://onesignal.com/api/v1/notifications'
 
