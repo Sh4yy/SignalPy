@@ -172,7 +172,7 @@ class Filter:
         """
         json_data = {'field': field, 'relation': relation.value, 'value': value}
         if key:
-            json['key'] = key
+            json_data['key'] = key
         self._values.append(json_data)
         return self
 
@@ -395,6 +395,19 @@ class Notification:
         self._data['filters'] = filters.to_json()
         return self
 
+    @property
+    def filters(self):
+        """ Get filters """
+        return self._data.get('filters')
+
+    @filters.setter
+    def filters(self, filters: Filter):
+        """
+        add user targeting filters
+        :param filters: filter instance
+        """
+        self._data['filters'] = filters.to_json()
+
     def add_segments(self, segments: [str]):
         """
         add target segments
@@ -402,6 +415,19 @@ class Notification:
         """
         self._data['included_segments'] = segments
         return self
+
+    @property
+    def segments(self):
+        """ Get targeted segments """
+        return self._data.get('included_segments')
+
+    @segments.setter
+    def segments(self, segments: [str]):
+        """
+        add target segments
+        :param segments: list of segments
+        """
+        self._data['included_segments'] = segments
 
     def add_content(self, lang_code: str, message: str):
         """
@@ -430,6 +456,22 @@ class Notification:
         self._data['contents'] = dict(data)
         return self
 
+    @property
+    def contents(self):
+        """ :return: The notification's content (excluding the title),
+        a map of language codes to text for each language. """
+
+        return self._data.get('content')
+
+    @contents.setter
+    def contents(self, json_content):
+        """
+        The notification's content (excluding the title),
+        a map of language codes to text for each language.
+        :param json_content: add bulk json content
+        """
+        self.add_contents(json_content)
+
     def add_heading(self, lang_code: str, heading: str):
         """
         The notification's title, a map of language codes to text for each language
@@ -454,6 +496,21 @@ class Notification:
         data = self._data['headings'].items() + json_heading.items()
         self._data['headings'] = dict(data)
         return self
+
+    @property
+    def headings(self):
+        """ :return: The notification's title, a map
+        of language codes to text for each language """
+        return self._data.get('headings')
+
+    @headings.setter
+    def headings(self, json_heading: dict):
+        """
+        The notification's title, a map of language codes to text for each language
+        :param json_heading: add bulk json heading
+        Example: {"en": "English Title", "es": "Spanish Title"}
+        """
+        self.add_headings(json_heading)
 
     def add_subtitle(self, lang_code: str, subtitle: str):
         """
@@ -480,10 +537,35 @@ class Notification:
         self._data['subtitle'] = dict(data)
         return self
 
+    @property
+    def subtitles(self):
+        """ :return: The notification's subtitle, a map of
+        language codes to text for each language. """
+        return self._data.get('subtitles')
+
+    @subtitles.setter
+    def subtitles(self, json_subtitles: dict):
+        """
+        The notification's subtitle, a map of language codes to text for each language.
+        :param json_subtitles: add bulk json heading
+        Example: {"en": "English Subtitle", "es": "Spanish Subtitle"}
+        """
+        self.add_subtitles(json_subtitles)
+
     def set_content_available(self, value: bool):
         """ Sending true wakes your app from background to run custom native code """
         self._data['content_available'] = value
         return self
+
+    @property
+    def content_available(self):
+        """ Sending true wakes your app from background to run custom native code """
+        return self._data.get('content_available')
+
+    @content_available.setter
+    def content_available(self, value: bool):
+        """ Sending true wakes your app from background to run custom native code """
+        self._data['content_available'] = value
 
     def set_mutable_content(self, value: bool):
         """ Sending true allows you to change the notification
@@ -499,12 +581,37 @@ class Notification:
         self._data['data'] = data
         return self
 
+    @property
+    def data(self):
+        """:return: A custom map of data that is passed back to your app """
+        return self._data
+
+    @data.setter
+    def data(self, data: dict):
+        """
+        :param data: A custom map of data that is passed back to your app
+        Example: {"abc": "123", "foo": "bar"}
+        """
+        self.add_data(data)
+
     def add_url(self, url: str):
         """
         :param url: The URL to open in the browser when a user clicks on the notification.
         """
         self._data['url'] = url
         return self
+
+    @property
+    def url(self):
+        """:return: The URL to open in the browser when a user clicks on the notification. """
+        return self._data.get('url')
+
+    @url.setter
+    def url(self, url: str):
+        """
+        :param url: The URL to open in the browser when a user clicks on the notification.
+        """
+        self.add_url(url)
 
     def set_ios_attachments(self, attachments: dict):
         """
@@ -517,13 +624,46 @@ class Notification:
         self._data['ios_attachemtns'] = attachments
         return self
 
-    def set_bit_picture(self, picture: str):
+    @property
+    def ios_attachments(self):
+        """
+        Adds media attachments to notifications. Set as JSON object,
+        key as a media id of your choice and the value as a valid
+        local filename or URL. User must press and hold on the notification to view.
+        """
+        return self._data.get('ios_attachments')
+
+    @ios_attachments.setter
+    def ios_attachments(self, attachments: dict):
+        """
+        Adds media attachments to notifications. Set as JSON object,
+        key as a media id of your choice and the value as a valid
+        local filename or URL. User must press and hold on the notification to view.
+        :param attachments: attachments for your ios client
+        Example: {"id1": "https://domain.com/image.jpg"}
+        """
+        self.set_ios_attachments(attachments)
+
+    def set_big_picture(self, picture: str):
         """
         Picture to display in the expanded view.
         :param picture: Picture to display in the expanded view.
         """
-        self._data['bit_picture'] = picture
+        self._data['big_picture'] = picture
         return self
+
+    @property
+    def big_picture(self):
+        """ :return: Picture to display in the expanded view."""
+        return self._data.get('big_picture')
+
+    @big_picture.setter
+    def big_picture(self, picture: str):
+        """
+        Picture to display in the expanded view.
+        :param picture: Picture to display in the expanded view.
+        """
+        self.set_big_picture(picture)
 
     def set_adm_big_picture(self, picture: str):
         """
@@ -533,6 +673,22 @@ class Notification:
         self._data['adm_big_picture'] = picture
         return self
 
+    @property
+    def adm_big_picture(self):
+        """
+        Picture to display in the expanded view.
+        :return: Picture to display in the expanded view.
+        """
+        return self._data.get('adm_big_picture')
+
+    @adm_big_picture.setter
+    def adm_big_picture(self, picture: str):
+        """
+        Picture to display in the expanded view.
+        :param picture: Picture to display in the expanded view.
+        """
+        self.set_adm_big_picture(picture)
+
     def set_chrome_big_picture(self, picture: str):
         """
         Large picture to display below the notification text.
@@ -540,6 +696,19 @@ class Notification:
         """
         self._data['chrome_big_picture'] = picture
         return self
+
+    @property
+    def chrome_big_picture(self):
+        """ Large picture to display below the notification text. """
+        return self._data.get('chrome_big_picture')
+
+    @chrome_big_picture.setter
+    def chrome_big_picture(self, picture: str):
+        """
+        Large picture to display below the notification text.
+        :param picture: Must be a local URL.
+        """
+        self.set_chrome_big_picture(picture)
 
     def add_buttons(self, buttons: Buttons):
         """
@@ -589,6 +758,25 @@ class Notification:
         self._data['ios_category'] = category
         return self
 
+    @property
+    def ios_category(self):
+        """
+        Category APS payload, use with registerUserNotificationSettings:categories
+        in your Objective-C / Swift code. Example: in your Objective-C / Swift code.
+        """
+
+        return self._data.get('ios_category')
+
+    @ios_category.setter
+    def ios_category(self, category: str):
+        """
+        Category APS payload, use with registerUserNotificationSettings:categories
+        in your Objective-C / Swift code. Example: in your Objective-C / Swift code.
+        :param category: category payload
+        """
+
+        self.set_ios_category(category)
+
     def set_delivery(self, delivery: Delivery):
         """
         set notification delivery option
@@ -597,7 +785,7 @@ class Notification:
 
         self._data = {**self._data, **delivery.data}
         return self
-
+    
     def to_json(self):
         """ :return: json string representation of this notification"""
         return json.dumps(self._data)
@@ -642,15 +830,15 @@ class OneSignal:
         return response.json()
 
     @staticmethod
-    def _post(url: str, headers: dict, paylaod: dict):
+    def _post(url: str, headers: dict, payload: dict):
         """
         make a post request
         :param url: endpoint url
         :param headers: request headers
-        :param paylaod: request payload
+        :param payload: request payload
         :return: json data
         """
-        response = requests.post(url, json=paylaod, headers=headers)
+        response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()
         return response.json()
 
