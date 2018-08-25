@@ -27,7 +27,113 @@ class Relation(Enum):
 
 
 class Notification:
-    pass
+
+    def __init__(self):
+        self._data = {}
+
+    def add_filters(self, filters: Filter):
+        """
+        add user targeting filters
+        :param filters: filter instance
+        """
+        self._data['filters'] = filters.to_json()
+        return self
+
+    def add_segments(self, segments: [str]):
+        """
+        add target segments
+        :param segments: list of segments
+        """
+        self._data['included_segments'] = segments
+        return self
+
+    def add_content(self, lang_code: str, message: str):
+        """
+        The notification's content (excluding the title),
+        a map of language codes to text for each language.
+        :param lang_code: language code string
+        :param message: localized text
+        """
+        if not hasattr(self._data, 'contents'):
+            self._data['contents'] = {}
+
+        self._data['contents'][lang_code] = message
+        return self
+
+    def add_contents(self, json_content: dict):
+        """
+        The notification's content (excluding the title),
+        a map of language codes to text for each language.
+        :param json_content: add bulk json content
+        Example: {"en": "English Message", "es": "Spanish Message"}
+        """
+        if not hasattr(self._data, 'contents'):
+            self._data['contents'] = {}
+
+        data = self._data['contents'].items() + json_content.items()
+        self._data['contents'] = dict(data)
+        return self
+
+    def add_heading(self, lang_code: str, heading: str):
+        """
+        The notification's title, a map of language codes to text for each language
+        :param lang_code: language code string
+        :param heading: localized text
+        """
+        if not hasattr(self._data, 'headings'):
+            self._data['headings'] = {}
+
+        self._data['headings'][lang_code] = heading
+        return self
+
+    def add_headings(self, json_heading: dict):
+        """
+        The notification's title, a map of language codes to text for each language
+        :param json_heading: add bulk json heading
+        Example: {"en": "English Title", "es": "Spanish Title"}
+        """
+        if not hasattr(self._data, 'headings'):
+            self._data['headings'] = {}
+
+        data = self._data['headings'].items() + json_heading.items()
+        self._data['headings'] = dict(data)
+        return self
+
+    def add_subtitle(self, lang_code: str, subtitle: str):
+        """
+        The notification's subtitle, a map of language codes to text for each language.
+        :param lang_code: language code string
+        :param subtitle: localized text
+        """
+        if not hasattr(self._data, 'subtitle'):
+            self._data['subtitle'] = {}
+
+        self._data['subtitle'][lang_code] = subtitle
+        return self
+
+    def add_subtitles(self, json_subtitles: dict):
+        """
+        The notification's subtitle, a map of language codes to text for each language.
+        :param json_subtitles: add bulk json heading
+        Example: {"en": "English Subtitle", "es": "Spanish Subtitle"}
+        """
+        if not hasattr(self._data, 'subtitle'):
+            self._data['subtitle'] = {}
+
+        data = self._data['subtitle'].items() + json_subtitles.items()
+        self._data['subtitle'] = dict(data)
+        return self
+
+    def set_content_available(self, value: bool):
+        """ Sending true wakes your app from background to run custom native code """
+        self._data['content_available'] = value
+        return self
+
+    def set_mutable_content(self, value: bool):
+        """ Sending true allows you to change the notification
+        content in your app before it is displayed. """
+        self._data['mutable_content'] = value
+        return self
 
 
 class Filter:
@@ -47,14 +153,18 @@ class Filter:
             raise Exception('Invalid relation was provided')
         return True
 
-    def _base_filter(self, key, relation: Relation, value):
+    def _base_filter(self, field, relation: Relation, value, key=None):
         """
         base filter generator
-        :param key: filter key
+        :param field: field name
         :param relation: filter's relation
         :param value: filter's value
+        :param key: optional filter key
         """
-        self._values.append({'key': key, 'relation': relation.value, 'value': value})
+        json_data = {'field': field, 'relation': relation.value, 'value': value}
+        if key:
+            json['key'] = key
+        self._values.append(json_data)
         return self
 
     def last_session(self, relation: Relation, hours_ago: float):
@@ -116,7 +226,7 @@ class Filter:
         :param relation: ">", "<", "=", "!=", "exists", "not_exists"
         :param value: Tag value to compare to
         """
-        self._base_filter(key, relation, value)
+        self._base_filter('tag', relation, value, key=key)
 
     def language(self, relation: Relation, lang: str):
         """
