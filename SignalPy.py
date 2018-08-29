@@ -4,6 +4,9 @@ from enum import Enum
 import json
 import re
 
+# todo Appearance: https://documentation.onesignal.com/reference#section-appearance
+# todo Grouping and Collapsing: https://documentation.onesignal.com/reference#section-grouping-collapsing
+
 
 class _LangCodes:
     """LangCodes Class"""
@@ -149,7 +152,7 @@ class Filter:
 
     def __init__(self):
         """ initiate a new Filter """
-        self._values = []
+        self._data = []
 
     @staticmethod
     def accepts(relations: [Relation], provided: Relation):
@@ -173,7 +176,7 @@ class Filter:
         json_data = {'field': field, 'relation': relation.value, 'value': value}
         if key:
             json_data['key'] = key
-        self._values.append(json_data)
+        self._data.append(json_data)
         return self
 
     def last_session(self, relation: Relation, hours_ago: float):
@@ -260,7 +263,7 @@ class Filter:
         :param lat: latitude
         :param long: longitude
         """
-        self._values.append({'radius': radius, 'lat': lat, 'long': long})
+        self._data.append({'radius': radius, 'lat': lat, 'long': long})
         return self
 
     def country(self, country_code: str):
@@ -273,18 +276,22 @@ class Filter:
     @property
     def and_(self):
         """ appends And between the previous and next entries """
-        self._values.append({'operator': 'AND'})
+        self._data.append({'operator': 'AND'})
         return self
 
     @property
     def or_(self):
         """ appends Or between the previous and next entries """
-        self._values.append({'operator': 'OR'})
+        self._data.append({'operator': 'OR'})
         return self
+
+    @property
+    def data(self):
+        return self._data
 
     def to_json(self):
         """ :return: json formatter filter """
-        return json.dumps(self._values)
+        return json.dumps(self._data)
 
 
 class TargetDevice:
@@ -392,7 +399,7 @@ class Notification:
         add user targeting filters
         :param filters: filter instance
         """
-        self._data['filters'] = filters.to_json()
+        self._data['filters'] = filters.data
         return self
 
     @property
@@ -723,6 +730,7 @@ class Notification:
 
         self._data['buttons'] += buttons.buttons
         self._data['web_buttons'] += buttons.web_buttons
+        return self
 
     def add_buttons_raw(self, json_data: dict):
         """
@@ -785,6 +793,10 @@ class Notification:
 
         self._data = {**self._data, **delivery.data}
         return self
+
+    @property
+    def data(self):
+        return self._data
     
     def to_json(self):
         """ :return: json string representation of this notification"""
@@ -813,7 +825,7 @@ class OneSignal:
         :return: header in dict format
         """
         return {
-            "Content-Type": "application/json; charset=utf-8",
+            "Content-Type": "application/json",
             "Authorization": "Basic {}".format(api_key)
         }
 
@@ -860,7 +872,7 @@ class OneSignal:
         :param notification: notification instance
         :return: (not decided yet)
         """
-        payload = notification.to_json()
+        payload = notification.data
         payload['app_id'] = self._app_id
         headers = OneSignal._create_header(self._api_key)
         return OneSignal._post(self._url, headers, payload)
