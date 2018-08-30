@@ -4,6 +4,7 @@ from enum import Enum
 import json
 import re
 
+
 # todo Appearance: https://documentation.onesignal.com/reference#section-appearance
 # todo Grouping and Collapsing: https://documentation.onesignal.com/reference#section-grouping-collapsing
 
@@ -38,7 +39,6 @@ class DelayedOption(Enum):
 
 
 class Delivery:
-
     def __init__(self):
         self._data = {}
 
@@ -72,7 +72,7 @@ class Delivery:
         self._data['delivery_time_of_day'] = time
         return self
 
-    def time_to_live(self, seconds: int, delta: timedelta=None):
+    def time_to_live(self, seconds: int, delta: timedelta = None):
         """
         Time To Live - In seconds. The notification will be expired if the device
         does not come back online within this time. The default is 259,200 seconds (3 days).
@@ -104,12 +104,11 @@ class Delivery:
 
 
 class Buttons:
-
     def __init__(self):
         self._buttons = []
         self._web_buttons = []
 
-    def add_button(self, id: str, text: str, icon: str=None):
+    def add_button(self, id: str, text: str, icon: str = None):
         """
         Add a new action button
         :param id: button's id
@@ -149,7 +148,6 @@ class Buttons:
 
 
 class Filter:
-
     def __init__(self):
         """ initiate a new Filter """
         self._data = []
@@ -295,9 +293,8 @@ class Filter:
 
 
 class TargetDevice:
-
     def __init__(self):
-        self._values = {}
+        self._data = {}
 
     def include_player_ids(self, tokens: [str]):
         """
@@ -307,7 +304,7 @@ class TargetDevice:
 
         if len(tokens) > 2000:
             raise Exception('Exceeded the limit of 2000 per api call')
-        self._values['include_player_ids'] = tokens
+        self._data['include_player_ids'] = tokens
         return self
 
     def include_ios_tokens(self, tokens: [str]):
@@ -321,7 +318,7 @@ class TargetDevice:
             raise Exception('Exceeded the limit of 2000 per api call')
         # removing all non alphanumerical characters
         tokens = map(lambda x: re.sub(r'\W+', '', x), tokens)
-        self._values['include_ios_tokens'] = tokens
+        self._data['include_ios_tokens'] = tokens
         return self
 
     def include_wp_wns_uris(self, tokens: [str]):
@@ -333,7 +330,7 @@ class TargetDevice:
         """
         if len(tokens) > 2000:
             raise Exception('Exceeded the limit of 2000 per api call')
-        self._values['include_wp_wns_uris'] = tokens
+        self._data['include_wp_wns_uris'] = tokens
         return self
 
     def include_amazon_reg_ids(self, tokens: [str]):
@@ -345,7 +342,7 @@ class TargetDevice:
         """
         if len(tokens) > 2000:
             raise Exception('Exceeded the limit of 2000 per api call')
-        self._values['include_amazon_reg_ids'] = tokens
+        self._data['include_amazon_reg_ids'] = tokens
         return self
 
     def include_chrome_reg_ids(self, tokens: [str]):
@@ -357,7 +354,7 @@ class TargetDevice:
         """
         if len(tokens) > 2000:
             raise Exception('Exceeded the limit of 2000 per api call')
-        self._values['include_chrome_reg_ids'] = tokens
+        self._data['include_chrome_reg_ids'] = tokens
         return self
 
     def include_chrome_web_reg_ids(self, tokens: [str]):
@@ -369,7 +366,7 @@ class TargetDevice:
         """
         if len(tokens) > 2000:
             raise Exception('Exceeded the limit of 2000 per api call')
-        self._values['include_chrome_web_reg_ids'] = tokens
+        self._data['include_chrome_web_reg_ids'] = tokens
         return self
 
     def include_android_reg_ids(self, tokens: [str]):
@@ -381,16 +378,19 @@ class TargetDevice:
         """
         if len(tokens) > 2000:
             raise Exception('Exceeded the limit of 2000 per api call')
-        self._values['include_android_reg_ids'] = tokens
+        self._data['include_android_reg_ids'] = tokens
         return self
+
+    @property
+    def data(self):
+        return self._data
 
     def to_json(self):
         """ :return: json formatted TargetDevice """
-        return json.dumps(self._values)
+        return json.dumps(self._data)
 
 
 class Notification:
-
     def __init__(self):
         self._data = {}
 
@@ -794,17 +794,25 @@ class Notification:
         self._data = {**self._data, **delivery.data}
         return self
 
+    def set_target_device(self, target: TargetDevice):
+        """
+        set targeted devices for this notification
+        :param target: TargetDevice instance
+        """
+
+        self.data = {**self._data, **target.data}
+        return self
+
     @property
     def data(self):
         return self._data
-    
+
     def to_json(self):
         """ :return: json string representation of this notification"""
         return json.dumps(self._data)
 
 
 class OneSignal:
-
     _url = 'https://onesignal.com/api/v1/notifications'
 
     def __init__(self, app_id: str, api_key: str):
